@@ -26,13 +26,13 @@ async function handlerSubmit(event) {
 
     // const form = event.currentTarget;
     // const queryValue = form.elements.query.value;
-    queryValue = event.currentTarget.elements.query.value;
+    queryValue = event.currentTarget.elements.query.value.trim();
     if (!queryValue) {
         showError("Please enter something!");
         return;
     }
 
-    // gallery.innerHTML = '';
+    gallery.innerHTML = '';
     page = 1;
     loadingIndicator.style.display = 'block';
     loadMoreButton.style.display = 'none';
@@ -45,9 +45,7 @@ async function handlerSubmit(event) {
             renderGallery(data.hits, true);
             lightbox.refresh();
             if (data.hits.length === perPage) {
-                setTimeout(() => {
-                    loadMoreButton.style.display = 'block';
-                }, 300);
+                loadMoreButton.style.display = 'block';
             }
         }
     } catch (error) {
@@ -87,9 +85,6 @@ async function handlerLoadMore() {
         const data = await fetchImages(queryValue, page, perPage);
         renderGallery(data.hits, false);
         lightbox.refresh();
-        setTimeout(() => {
-            loadMoreButton.style.display = 'block';
-        }, 300);
 
         const { height: cardHeight } = gallery.firstElementChild.getBoundingClientRect();
         window.scrollBy({
@@ -97,14 +92,14 @@ async function handlerLoadMore() {
             behavior: 'smooth',
         });
 
-        if (data.hits.length < perPage) {
-            showInfo("We're sorry, but you've reached the end of search results.");
-            setTimeout(() => {
-                loadMoreButton.style.display = 'none';
-            }, 300);
-            loadMoreButton.removeEventListener("click", handlerLoadMore);
-        }
-    } catch (error) {
+        if (data.hits.length === perPage) {
+            loadMoreButton.style.display = 'block';
+        } else {
+        showInfo("We're sorry, but you've reached the end of search results.");
+        loadMoreButton.removeEventListener("click", handlerLoadMore);
+    }
+    } 
+    catch (error) {
         showError('An error occurred while fetching images. Please try again later.');
     } finally {
         loadingIndicator.style.display = 'none';
